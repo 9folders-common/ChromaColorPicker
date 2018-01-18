@@ -26,11 +26,13 @@ import UIKit
 
 public protocol ChromaColorPickerDelegate {
     /* Called when the user taps the add button in the center */
-    func colorPickerDidChooseColor(_ colorPicker: ChromaColorPicker, color: UIColor)
+    func colorPickerDidChooseColor(_ colorPicker: ChromaColorPicker, color: UIColor, hexString: String)
+    func colorPickerChangingColor(_ colorPicker: ChromaColorPicker, color: UIColor, hexString: String)
 }
 
 open class ChromaColorPicker: UIControl {
     open var hexLabel: UILabel!
+    open var hexTextField: UITextField!
     open var shadeSlider: ChromaShadeSlider!
     open var handleView: ChromaHandle!
     open var handleLine: CAShapeLayer!
@@ -107,6 +109,17 @@ open class ChromaColorPicker: UIControl {
         hexLabel.adjustsFontSizeToFitWidth = true
         hexLabel.textAlignment = .center
         hexLabel.textColor = UIColor(red: 51/255.0, green:51/255.0, blue: 51/255.0, alpha: 0.65)
+        hexLabel.isHidden = true
+        
+        /* Setup Color Hex Textfield */
+        hexTextField = UITextField() //layout frame
+        self.layoutHexTextField()
+        hexTextField.layer.cornerRadius = 2
+        hexTextField.adjustsFontSizeToFitWidth = true
+        hexTextField.textAlignment = .center
+        hexTextField.textColor = UIColor(red: 51/255.0, green:51/255.0, blue: 51/255.0, alpha: 0.65)
+        hexTextField.borderStyle = .none
+        hexTextField.delegate = self
         
         /* Setup Shade Slider */
         shadeSlider = ChromaShadeSlider()
@@ -125,9 +138,13 @@ open class ChromaColorPicker: UIControl {
         self.layer.addSublayer(handleLine)
         self.addSubview(shadeSlider)
         self.addSubview(hexLabel)
+        self.addSubview(hexTextField)
         self.addSubview(handleView)
         self.addSubview(addButton)
         self.addSubview(colorToggleButton)
+        
+        /* keyboard */
+        hexTextField.becomeFirstResponder()
     }
     
     override open func willMove(toSuperview newSuperview: UIView?) {
@@ -174,6 +191,10 @@ open class ChromaColorPicker: UIControl {
         self.layoutHandle()
         self.layoutHandleLine()
         self.updateHexLabel()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
+            self.delegate?.colorPickerChangingColor(self, color: self.addButton.color, hexString: "#\(self.addButton.color.hexCode)")
+        })
     }
     
     //MARK: - Handle Touches
@@ -264,7 +285,7 @@ open class ChromaColorPicker: UIControl {
                     })
                 })
         
-        delegate?.colorPickerDidChooseColor(self, color: sender.color) //Delegate call
+        delegate?.colorPickerDidChooseColor(self, color: sender.color, hexString: self.hexLabel.text!) //Delegate call
     }
     
   @objc func sliderEditingDidEnd(_ sender: ChromaShadeSlider){
@@ -340,8 +361,9 @@ open class ChromaColorPicker: UIControl {
         self.layoutHandle()
         
         //Ensure colors are updated
-        self.updateCurrentColor(handleView.color)
-        shadeSlider.primaryColor = handleView.color
+        //self.updateCurrentColor(handleView.color)
+        //self.updateHexLabel()
+        //shadeSlider.primaryColor = handleView.color
         
         self.layoutShadeSlider()
         self.layoutHandleLine()
@@ -391,6 +413,15 @@ open class ChromaColorPicker: UIControl {
     }
     
     /*
+     Pre: dependant on addButtons position
+     */
+    func layoutHexTextField(){
+        hexTextField.frame = CGRect(x: 0, y: 0, width: addButton.bounds.width*1.5, height: addButton.bounds.height/3)
+        hexTextField.center = CGPoint(x: self.bounds.midX, y: (addButton.frame.origin.y + (padding + handleView.frame.height/2 + stroke/2))/1.75) //Divided by 1.75 not 2 to make it a bit lower
+        hexTextField.font = UIFont(name: "Menlo-Regular", size: hexLabel.bounds.height)
+    }
+    
+    /*
     Pre: dependant on radius
     */
     func layoutShadeSlider(){
@@ -419,7 +450,10 @@ open class ChromaColorPicker: UIControl {
     }
     
     func updateHexLabel(){
-        hexLabel.text = "#" + currentColor.hexCode
+        hexLabel.text = "#" + self.addButton.color.hexCode
+        hexTextField.text = "#" + self.addButton.color.hexCode
+        
+        self.delegate?.colorPickerChangingColor(self, color: addButton.color, hexString: "#\(addButton.color.hexCode)")
     }
     
     func updateCurrentColor(_ color: UIColor){
@@ -428,7 +462,7 @@ open class ChromaColorPicker: UIControl {
         self.sendActions(for: .valueChanged)
     }
     
-  @objc open func togglePickerColorMode() {
+    @objc open func togglePickerColorMode() {
         colorToggleButton.isEnabled = false // Lock
         
         // Redraw Assets (i.e. Large circle ring)
@@ -474,6 +508,10 @@ open class ChromaColorPicker: UIControl {
             shadeSlider.primaryColor = hueColor
         }
         
+        // textfield
+        self.hexTextField.textColor = self.addButton.color
+        self.hexTextField.tintColor = self.addButton.color
+        
         colorToggleButton.isEnabled = true // Unlock
     }
     
@@ -491,6 +529,37 @@ open class ChromaColorPicker: UIControl {
         }
 
         return adjustedAngle
+    }
+    
+    fileprivate func hexStringToUIColor (hex:String) -> UIColor {
+        var cString:String = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        
+        if (cString.hasPrefix("#")) {
+            cString.remove(at: cString.startIndex)
+        }
+        
+        if ((cString.count) == 3) {
+            var newString = ""
+            for (_, char) in cString.enumerated() {
+                newString.append(char)
+                newString.append(char)
+            }
+            cString = newString
+        }
+        
+        if ((cString.count) != 6) {
+            return UIColor.gray
+        }
+        
+        var rgbValue:UInt32 = 0
+        Scanner(string: cString).scanHexInt32(&rgbValue)
+        
+        return UIColor(
+            red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
+            green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
+            blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
+            alpha: CGFloat(1.0)
+        )
     }
     
     /* Find the angle relative to the center of the frame and uses the angle to find what color lies there */
@@ -518,3 +587,58 @@ extension ChromaColorPicker: ChromaShadeSliderDelegate{
         self.updateHexLabel()
     }
 }
+
+
+extension ChromaColorPicker: UITextFieldDelegate {
+    
+    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let invalidCharSet: NSCharacterSet = NSCharacterSet.init(charactersIn: "#1234567890abcdefABCDEF").inverted as NSCharacterSet
+        let filtered: String = (string.components(separatedBy: invalidCharSet as CharacterSet) as NSArray).componentsJoined(by: "")
+        if string != filtered {
+            return false
+        }
+        var inputString: String = (textField.text! as NSString).replacingCharacters(in: range, with: string)
+        inputString = inputString.replacingOccurrences(of: "#", with: "")
+        inputString = "#".appending(inputString)
+        textField.delegate = nil
+        textField.text = inputString
+        textField.delegate = self
+        
+        if inputString.count == 4 {
+            let color: UIColor = self.hexStringToUIColor(hex: inputString)
+            if inputString.lowercased() != "#FF".lowercased() {
+                textField.textColor = color
+                textField.tintColor = color
+            }
+            else {
+                textField.textColor = UIColor.black
+                textField.tintColor = UIColor.black
+            }
+            self .adjustToColor(color)
+            textField.text = inputString
+        }
+        else if inputString.count >= 7 {
+            let color: UIColor = self.hexStringToUIColor(hex: inputString)
+            if inputString.lowercased() != "#FFFFFF".lowercased() {
+                textField.textColor = color
+                textField.tintColor = color
+            }
+            else {
+                textField.textColor = UIColor.black
+                textField.tintColor = UIColor.black
+            }
+            self .adjustToColor(color)
+        }
+        else {
+            textField.textColor = UIColor.black
+            textField.tintColor = UIColor.black
+        }
+        
+        return false
+    }
+}
+
+
+
+
+
