@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		19FFA53F31A463C06785F28F /* Pods_ChromaColorPickerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 91485B6B5C58777417441794 /* Pods_ChromaColorPickerTests.framework */; };
+		1B5DE2702012030F001EE91A /* ChromaCenterButtonCreatingDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B5DE26D20120306001EE91A /* ChromaCenterButtonCreatingDelegate.swift */; };
+		1B5DE27120120312001EE91A /* ChromaCenterButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B5DE26C20120306001EE91A /* ChromaCenterButton.swift */; };
 		3503B8331F2689BC00750356 /* ChromaColorPicker.h in Headers */ = {isa = PBXBuildFile; fileRef = 3503B8311F2689BC00750356 /* ChromaColorPicker.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3503B8361F2689BC00750356 /* ChromaColorPicker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3503B82F1F2689BC00750356 /* ChromaColorPicker.framework */; };
 		3503B8371F2689BC00750356 /* ChromaColorPicker.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3503B82F1F2689BC00750356 /* ChromaColorPicker.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -58,6 +60,8 @@
 
 /* Begin PBXFileReference section */
 		0722B34CBD5489ADC94F7B91 /* Pods-ChromaColorPickerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ChromaColorPickerTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ChromaColorPickerTests/Pods-ChromaColorPickerTests.release.xcconfig"; sourceTree = "<group>"; };
+		1B5DE26C20120306001EE91A /* ChromaCenterButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChromaCenterButton.swift; sourceTree = "<group>"; };
+		1B5DE26D20120306001EE91A /* ChromaCenterButtonCreatingDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChromaCenterButtonCreatingDelegate.swift; sourceTree = "<group>"; };
 		3503B82F1F2689BC00750356 /* ChromaColorPicker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ChromaColorPicker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3503B8311F2689BC00750356 /* ChromaColorPicker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ChromaColorPicker.h; sourceTree = "<group>"; };
 		3503B8321F2689BC00750356 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -156,6 +160,8 @@
 		35C376EC1D5CF9450069D7A1 /* ChromaColorPicker */ = {
 			isa = PBXGroup;
 			children = (
+				1B5DE26C20120306001EE91A /* ChromaCenterButton.swift */,
+				1B5DE26D20120306001EE91A /* ChromaCenterButtonCreatingDelegate.swift */,
 				35C376E41D5CF9400069D7A1 /* ChromaColorPicker.swift */,
 				35C376E31D5CF9400069D7A1 /* ChromaHandle.swift */,
 				35C376E21D5CF9400069D7A1 /* ChromaAddButton.swift */,
@@ -392,7 +398,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B5DE2702012030F001EE91A /* ChromaCenterButtonCreatingDelegate.swift in Sources */,
 				3503B83C1F2689C400750356 /* ChromaColorPicker.swift in Sources */,
+				1B5DE27120120312001EE91A /* ChromaCenterButton.swift in Sources */,
 				3503B83D1F2689C400750356 /* ChromaHandle.swift in Sources */,
 				3503B8641F27D2B100750356 /* ColorModeToggleButton.swift in Sources */,
 				3503B83E1F2689C400750356 /* ChromaAddButton.swift in Sources */,

@@ -24,10 +24,10 @@
 
 import UIKit
 
-public protocol ChromaColorPickerDelegate {
+@objc public protocol ChromaColorPickerDelegate {
     /* Called when the user taps the add button in the center */
     func colorPickerDidChooseColor(_ colorPicker: ChromaColorPicker, color: UIColor, hexString: String)
-    func colorPickerChangingColor(_ colorPicker: ChromaColorPicker, color: UIColor, hexString: String)
+    @objc optional func colorPickerChangingColor(_ colorPicker: ChromaColorPicker, color: UIColor, hexString: String)
 }
 
 open class ChromaColorPicker: UIControl {
@@ -36,8 +36,28 @@ open class ChromaColorPicker: UIControl {
     open var shadeSlider: ChromaShadeSlider!
     open var handleView: ChromaHandle!
     open var handleLine: CAShapeLayer!
-    open var addButton: ChromaAddButton!
+    open var addButton: (UIButton & ScrollableGraphViewDataSource)!
     open var colorToggleButton: ColorModeToggleButton!
+    
+    open var removeAddIconOnCenterButton: Bool = false {
+        didSet {
+            if supportsShadesOfGray == true {
+                let button: (UIButton & ScrollableGraphViewDataSource)! = self.addButton
+                addButton.removeFromSuperview()
+                addButton = nil
+                
+                addButton = ChromaCenterButton()
+                addButton.frame = button.frame
+                addButton.color = button.color
+                self.layoutAddButton() //layout frame
+                addButton.addTarget(self, action: #selector(ChromaColorPicker.addButtonPressed(_:)), for: .touchUpInside)
+                self.addSubview(addButton)
+            }
+            else {
+                // do nothing
+            }
+        }
+    }
     
     private var modeIsGrayscale: Bool {
         return colorToggleButton.colorState == .grayscale
@@ -93,9 +113,16 @@ open class ChromaColorPicker: UIControl {
         handleView.addGestureRecognizer(panRecognizer)
         
         /* Setup Add Button */
-        addButton = ChromaAddButton()
-        self.layoutAddButton() //layout frame
-        addButton.addTarget(self, action: #selector(ChromaColorPicker.addButtonPressed(_:)), for: .touchUpInside)
+        if self.removeAddIconOnCenterButton == false {
+            addButton = ChromaAddButton()
+            self.layoutAddButton() //layout frame
+            addButton.addTarget(self, action: #selector(ChromaColorPicker.addButtonPressed(_:)), for: .touchUpInside)
+        }
+        else {
+            addButton = ChromaCenterButton()
+            self.layoutAddButton() //layout frame
+            addButton.addTarget(self, action: #selector(ChromaColorPicker.addButtonPressed(_:)), for: .touchUpInside)
+        }
         
         /* Setup Handle Line */
         handleLine = CAShapeLayer()
@@ -140,11 +167,13 @@ open class ChromaColorPicker: UIControl {
         self.addSubview(hexLabel)
         self.addSubview(hexTextField)
         self.addSubview(handleView)
-        self.addSubview(addButton)
+        if addButton != nil {
+            self.addSubview(addButton)
+        }
         self.addSubview(colorToggleButton)
         
         /* keyboard */
-        hexTextField.becomeFirstResponder()
+        //hexTextField.becomeFirstResponder()
     }
     
     override open func willMove(toSuperview newSuperview: UIView?) {
@@ -193,7 +222,7 @@ open class ChromaColorPicker: UIControl {
         self.updateHexLabel()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
-            self.delegate?.colorPickerChangingColor(self, color: self.addButton.color, hexString: "#\(self.addButton.color.hexCode)")
+            self.delegate?.colorPickerChangingColor?(self, color: self.addButton.color, hexString: "#\(self.addButton.color.hexCode)")
         })
     }
     
@@ -453,7 +482,7 @@ open class ChromaColorPicker: UIControl {
         hexLabel.text = "#" + self.addButton.color.hexCode
         hexTextField.text = "#" + self.addButton.color.hexCode
         
-        self.delegate?.colorPickerChangingColor(self, color: addButton.color, hexString: "#\(addButton.color.hexCode)")
+        self.delegate?.colorPickerChangingColor?(self, color: addButton.color, hexString: "#\(addButton.color.hexCode)")
     }
     
     func updateCurrentColor(_ color: UIColor){
@@ -515,6 +544,12 @@ open class ChromaColorPicker: UIControl {
         colorToggleButton.isEnabled = true // Unlock
     }
     
+    //MARK: - UIControl
+    open override func resignFirstResponder() -> Bool {
+        let retVal = super.resignFirstResponder()
+        hexTextField.resignFirstResponder()
+        return retVal
+    }
     
     //MARK: - Helper Methods
     private func angleToCenterFromPoint(_ point: CGPoint) -> Float {
@@ -600,6 +635,9 @@ extension ChromaColorPicker: UITextFieldDelegate {
         var inputString: String = (textField.text! as NSString).replacingCharacters(in: range, with: string)
         inputString = inputString.replacingOccurrences(of: "#", with: "")
         inputString = "#".appending(inputString)
+        if inputString.count > 7 {
+            return false
+        }
         textField.delegate = nil
         textField.text = inputString
         textField.delegate = self
@@ -637,8 +675,3 @@ extension ChromaColorPicker: UITextFieldDelegate {
         return false
     }
 }
-
-
-
-
-

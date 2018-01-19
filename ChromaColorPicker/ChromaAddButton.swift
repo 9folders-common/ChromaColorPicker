@@ -24,7 +24,7 @@
 
 import UIKit
 
-open class ChromaAddButton: UIButton {
+open class ChromaAddButton: UIButton, ScrollableGraphViewDataSource {
     open var color = UIColor.gray{
         didSet{
             if let layer = circleLayer{
