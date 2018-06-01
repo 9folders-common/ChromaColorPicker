@@ -38,6 +38,7 @@ open class ChromaColorPicker: UIControl {
     open var handleLine: CAShapeLayer!
     open var addButton: (UIButton & ScrollableGraphViewDataSource)!
     open var colorToggleButton: ColorModeToggleButton!
+    open var colorToggleCoverButton: UIButton!
     
     open var removeAddIconOnCenterButton: Bool = false {
         didSet {
@@ -72,9 +73,11 @@ open class ChromaColorPicker: UIControl {
         didSet {
             if supportsShadesOfGray {
                 colorToggleButton.isHidden = false
+                colorToggleCoverButton.isHidden = false
             }
             else {
                 colorToggleButton.isHidden = true
+                colorToggleCoverButton.isHidden = true
             }
         }
     }
@@ -154,11 +157,16 @@ open class ChromaColorPicker: UIControl {
         self.layoutShadeSlider()
         shadeSlider.addTarget(self, action: #selector(ChromaColorPicker.sliderEditingDidEnd(_:)), for: .editingDidEnd)
         
+        /* Setup Color Mode Toggle Cover Button */
+        colorToggleCoverButton = UIButton()
+        colorToggleCoverButton.addTarget(self, action: #selector(togglePickerColorMode(_:)), for: .touchUpInside)
+        colorToggleCoverButton.isHidden = !supportsShadesOfGray // default to hiding if not supported
+        
         /* Setup Color Mode Toggle Button */
         colorToggleButton = ColorModeToggleButton()
         self.layoutColorToggleButton() //layout frame
         colorToggleButton.colorState = .hue // Default as starting state is hue
-        colorToggleButton.addTarget(self, action: #selector(togglePickerColorMode), for: .touchUpInside)
+        colorToggleButton.addTarget(self, action: #selector(togglePickerColorMode(_:)), for: .touchUpInside)
         colorToggleButton.isHidden = !supportsShadesOfGray // default to hiding if not supported
         
         /* Add components to view */
@@ -170,6 +178,7 @@ open class ChromaColorPicker: UIControl {
         if addButton != nil {
             self.addSubview(addButton)
         }
+        self.addSubview(colorToggleCoverButton)
         self.addSubview(colorToggleButton)
         
         /* keyboard */
@@ -476,6 +485,12 @@ open class ChromaColorPicker: UIControl {
         let inset = bounds.height/16
         colorToggleButton.frame = CGRect(x: inset, y: inset, width: addButton.frame.width/2.5, height: addButton.frame.width/2.5)
         colorToggleButton.layoutSubviews()
+        
+        colorToggleCoverButton.frame = CGRect(x: 0.0,
+                                              y: 0.0,
+                                              width: colorToggleButton.frame.width * 2.0,
+                                              height: colorToggleButton.frame.height * 2.0)
+        colorToggleCoverButton.center = colorToggleButton.center;
     }
     
     func updateHexLabel(){
@@ -491,8 +506,12 @@ open class ChromaColorPicker: UIControl {
         self.sendActions(for: .valueChanged)
     }
     
-    @objc open func togglePickerColorMode() {
+    @objc open func togglePickerColorMode(_ sender: UIButton) {
+        if sender.isEqual(colorToggleCoverButton) {
+            colorToggleButton.toggleState()
+        }
         colorToggleButton.isEnabled = false // Lock
+        colorToggleCoverButton.isEnabled = false
         
         // Redraw Assets (i.e. Large circle ring)
         setNeedsDisplay()
@@ -542,6 +561,7 @@ open class ChromaColorPicker: UIControl {
         self.hexTextField.tintColor = self.addButton.color
         
         colorToggleButton.isEnabled = true // Unlock
+        colorToggleCoverButton.isEnabled = true
     }
     
     //MARK: - UIControl
