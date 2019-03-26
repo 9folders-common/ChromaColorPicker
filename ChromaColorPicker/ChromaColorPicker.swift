@@ -446,7 +446,9 @@ open class ChromaColorPicker: UIControl {
     */
     func layoutHexLabel(){
         hexLabel.frame = CGRect(x: 0, y: 0, width: addButton.bounds.width*1.5, height: addButton.bounds.height/3)
-        hexLabel.center = CGPoint(x: self.bounds.midX, y: (addButton.frame.origin.y + (padding + handleView.frame.height/2 + stroke/2))/1.75) //Divided by 1.75 not 2 to make it a bit lower
+        var pointY = addButton.frame.origin.y + (padding + handleView.frame.height/2 + stroke/2)
+        pointY = pointY / 1.75
+        hexLabel.center = CGPoint(x: self.bounds.midX, y: pointY) //Divided by 1.75 not 2 to make it a bit lower
         hexLabel.font = UIFont(name: "Menlo-Regular", size: hexLabel.bounds.height)
     }
     
@@ -455,7 +457,9 @@ open class ChromaColorPicker: UIControl {
      */
     func layoutHexTextField(){
         hexTextField.frame = CGRect(x: 0, y: 0, width: addButton.bounds.width*1.5, height: addButton.bounds.height/3)
-        hexTextField.center = CGPoint(x: self.bounds.midX, y: (addButton.frame.origin.y + (padding + handleView.frame.height/2 + stroke/2))/1.75) //Divided by 1.75 not 2 to make it a bit lower
+        var pointY = addButton.frame.origin.y + (padding + handleView.frame.height/2 + stroke/2)
+        pointY = pointY / 1.75
+        hexTextField.center = CGPoint(x: self.bounds.midX, y: pointY) //Divided by 1.75 not 2 to make it a bit lower
         hexTextField.font = UIFont(name: "Menlo-Regular", size: hexLabel.bounds.height)
     }
     
