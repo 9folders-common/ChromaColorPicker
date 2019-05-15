@@ -247,7 +247,7 @@ open class ChromaColorPicker: UIControl {
             /* Enlarge Animation */
             UIView.animate(withDuration: 0.15, delay: 0, options: .curveEaseIn, animations: { () -> Void in
                 self.handleView.transform = CGAffineTransform(scaleX: 1.45, y: 1.45)
-                }, completion: nil)
+            }, completion: nil)
         }
     }
     override open func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -257,15 +257,15 @@ open class ChromaColorPicker: UIControl {
         }
     }
     
-  @objc func handleWasMoved(_ recognizer: UIPanGestureRecognizer) {
+    @objc func handleWasMoved(_ recognizer: UIPanGestureRecognizer) {
         switch(recognizer.state){
-
+            
         case UIGestureRecognizerState.changed:
             let touchPosition = recognizer.location(in: self)
             self.moveHandleTowardPoint(touchPosition)
             self.sendActions(for: .touchDragInside)
             break
-        
+            
         case UIGestureRecognizerState.ended:
             /* Shrink Animation */
             self.executeHandleShrinkAnimation()
@@ -281,7 +281,7 @@ open class ChromaColorPicker: UIControl {
         self.sendActions(for: .editingDidEnd)
         UIView.animate(withDuration: 0.15, delay: 0, options: .curveEaseOut, animations: { () -> Void in
             self.handleView.transform = CGAffineTransform(scaleX: 1, y: 1)
-            }, completion: nil)
+        }, completion: nil)
     }
     
     private func moveHandleTowardPoint(_ point: CGPoint){
@@ -310,23 +310,28 @@ open class ChromaColorPicker: UIControl {
         self.updateHexLabel()
     }
     
-  @objc func addButtonPressed(_ sender: ChromaAddButton){
+    @objc func addButtonPressed(_ sender: ChromaAddButton){
+        let button: ChromaAddButton? = addButton as? ChromaAddButton ?? nil;
+        if button == nil {
+            return;
+        }
+        
         //Do a 'bob' animation
         UIView.animate(withDuration: 0.2,
-                delay: 0,
-                options: .curveEaseIn,
-                animations: { () -> Void in
-                    sender.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
-                }, completion: { (done) -> Void in
-                    UIView.animate(withDuration: 0.1, animations: { () -> Void in
-                        sender.transform = CGAffineTransform(scaleX: 1, y: 1)
-                    })
-                })
+                       delay: 0,
+                       options: .curveEaseIn,
+                       animations: { () -> Void in
+                        button!.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
+        }, completion: { (done) -> Void in
+            UIView.animate(withDuration: 0.1, animations: { () -> Void in
+                button!.transform = CGAffineTransform(scaleX: 1, y: 1)
+            })
+        })
         
-        delegate?.colorPickerDidChooseColor(self, color: sender.color, hexString: self.hexLabel.text!) //Delegate call
+        delegate?.colorPickerDidChooseColor(self, color: button!.color, hexString: self.hexLabel.text!) //Delegate call
     }
     
-  @objc func sliderEditingDidEnd(_ sender: ChromaShadeSlider){
+    @objc func sliderEditingDidEnd(_ sender: ChromaShadeSlider){
         self.sendActions(for: .editingDidEnd)
     }
     
@@ -340,15 +345,15 @@ open class ChromaColorPicker: UIControl {
     }
     
     /*
-    Resolution should be between 0.1 and 1
-    colorSpace - either rainbow or grayscale
-    */
+     Resolution should be between 0.1 and 1
+     colorSpace - either rainbow or grayscale
+     */
     private func drawCircleRing(in context: CGContext?, outerRadius: CGFloat, innerRadius: CGFloat, resolution: Float, colorSpace: ColorSpace){
         context?.saveGState()
         context?.translateBy(x: self.bounds.midX, y: self.bounds.midY) //Move context to center
         
         let subdivisions:CGFloat = CGFloat(resolution * 512) //Max subdivisions of 512
-
+        
         let innerHeight = (CGFloat.pi*innerRadius)/subdivisions //height of the inner wall for each segment
         let outterHeight = (CGFloat.pi*outerRadius)/subdivisions
         
@@ -415,8 +420,8 @@ open class ChromaColorPicker: UIControl {
     }
     
     /*
-    Update the handleView's position and color for the currentAngle
-    */
+     Update the handleView's position and color for the currentAngle
+     */
     func layoutHandle(){
         let angle = currentAngle //Preserve value in case it changes
         let newPosition = positionOnWheelFromAngle(angle) //find the correct position on the color wheel
@@ -431,9 +436,9 @@ open class ChromaColorPicker: UIControl {
     }
     
     /*
-    Updates the line view's position for the current angle
-    Pre: dependant on addButtons position & current angle
-    */
+     Updates the line view's position for the current angle
+     Pre: dependant on addButtons position & current angle
+     */
     func layoutHandleLine(){
         let linePath = UIBezierPath()
         linePath.move(to: addButton.center)
@@ -442,8 +447,8 @@ open class ChromaColorPicker: UIControl {
     }
     
     /*
-    Pre: dependant on addButtons position
-    */
+     Pre: dependant on addButtons position
+     */
     func layoutHexLabel(){
         hexLabel.frame = CGRect(x: 0, y: 0, width: addButton.bounds.width*1.5, height: addButton.bounds.height/3)
         var pointY = addButton.frame.origin.y + (padding + handleView.frame.height/2 + stroke/2)
@@ -464,8 +469,8 @@ open class ChromaColorPicker: UIControl {
     }
     
     /*
-    Pre: dependant on radius
-    */
+     Pre: dependant on radius
+     */
     func layoutShadeSlider(){
         /* Calculate proper length for slider */
         let centerPoint = CGPoint(x: bounds.midX, y: bounds.midY)
@@ -475,7 +480,7 @@ open class ChromaColorPicker: UIControl {
         let pointRight = CGPoint(x: centerPoint.x + insideRadius*CGFloat(cos(11*Double.pi/6)), y: centerPoint.y - insideRadius*CGFloat(sin(11*Double.pi/6)))
         let deltaX = pointRight.x - pointLeft.x //distance on circle between points at 7pi/6 and 11pi/6
         
-
+        
         let sliderSize = CGSize(width: deltaX * 0.75, height: 0.08 * (bounds.height - padding*2))//bounds.height
         shadeSlider.frame = CGRect(x: bounds.midX - sliderSize.width/2, y: pointLeft.y - sliderSize.height/2, width: sliderSize.width, height: sliderSize.height)
         shadeSlider.handleCenterX = shadeSlider.bounds.width/2 //set handle starting position
@@ -484,7 +489,7 @@ open class ChromaColorPicker: UIControl {
     
     /*
      Pre: dependant on addButton
-    */
+     */
     func layoutColorToggleButton() {
         let inset = bounds.height/16
         colorToggleButton.frame = CGRect(x: inset, y: inset, width: addButton.frame.width/2.5, height: addButton.frame.width/2.5)
@@ -586,7 +591,7 @@ open class ChromaColorPicker: UIControl {
         if (adjustedAngle < 0){ //Left side (Q2 and Q3)
             adjustedAngle += Float.pi*2
         }
-
+        
         return adjustedAngle
     }
     
