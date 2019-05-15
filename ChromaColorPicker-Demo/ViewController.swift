@@ -45,19 +45,23 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: ChromaColorPickerDelegate{
-    func colorPickerDidChooseColor(_ colorPicker: ChromaColorPicker, color: UIColor) {
+    func colorPickerDidChooseColor(_ colorPicker: ChromaColorPicker, color: UIColor, hexString: String) {
         //Set color for the display view
         colorDisplayView.backgroundColor = color
         
         //Perform zesty animation
         UIView.animate(withDuration: 0.2,
-                animations: {
-                    self.colorDisplayView.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
-                }, completion: { (done) in
-                UIView.animate(withDuration: 0.2, animations: { 
-                    self.colorDisplayView.transform = CGAffineTransform.identity
-                })
-        }) 
+                       animations: {
+                        self.colorDisplayView.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+        }, completion: { (done) in
+            UIView.animate(withDuration: 0.2, animations: {
+                self.colorDisplayView.transform = CGAffineTransform.identity
+            })
+        })
+    }
+    
+    func colorPickerChangingColor(_ colorPicker: ChromaColorPicker, color: UIColor, hexString: String) {
+        
     }
 }
 
