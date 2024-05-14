@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 public protocol ScrollableGraphViewDataSource {
     var color: UIColor { get set }
